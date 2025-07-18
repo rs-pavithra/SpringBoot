@@ -13,27 +13,28 @@ import java.util.List;
 @RequestMapping("/api/employees")
 public class EmployeeController {
 
+    private final EmployeeService employeeService;
+
     @Autowired
-    private EmployeeService employeeService;
+    public EmployeeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
 
+    // Upload CSV and save employees
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadCsv(@RequestParam("file") MultipartFile file) {
-        employeeService.saveEmployeesFromCsv(file);
-        return ResponseEntity.ok("CSV uploaded successfully.");
-    }
-    @PostMapping
-    public Employee saveEmployee(@RequestBody Employee employee) {
-        return employeeService.saveEmployee(employee);
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+        try {
+            employeeService.saveEmployeesFromCsv(file);
+            return ResponseEntity.ok("CSV file uploaded and employees saved successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 
-
+    // Get all employees
     @GetMapping
-    public List<Employee> getAll() {
-        return employeeService.getAll();
+    public ResponseEntity<List<Employee>> getAllEmployees() {
+        List<Employee> employees = employeeService.getAllEmployees();
+        return ResponseEntity.ok(employees);
     }
-    @GetMapping("/api/employees")
-    public List<Employee> getAllEmployees() {
-        return employeeService.getAll();
-    }
-
 }
